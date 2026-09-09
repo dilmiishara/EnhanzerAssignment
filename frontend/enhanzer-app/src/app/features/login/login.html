@@ -1,0 +1,94 @@
+<div class="login-page">
+
+  <div class="login-card">
+
+    <div class="brand">
+      <h1>eZuite</h1>
+      <p>Welcome back</p>
+    </div>
+
+    <form
+      [formGroup]="loginForm"
+      (ngSubmit)="onSubmit()"
+    >
+
+      <div class="form-group">
+
+        <label for="email">
+          Email
+        </label>
+
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="Enter your email"
+          autocomplete="email"
+        >
+
+        @if (email?.touched && email?.hasError('required')) {
+        <small class="error-message">
+            Email is required.
+        </small>
+        }
+
+        @if (email?.touched && email?.hasError('email')) {
+        <small class="error-message">
+            Please enter a valid email address.
+        </small>
+        }
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="password">
+          Password
+        </label>
+
+        <div class="password-wrapper">
+
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+          >
+
+          <button
+            class="password-toggle"
+            type="button"
+            (click)="togglePassword()"
+            aria-label="Show or hide password"
+          >
+            {{ showPassword ? 'Hide' : 'Show' }}
+          </button>
+
+        </div>
+
+        @if (
+          loginForm.get('password')?.touched &&
+          loginForm.get('password')?.hasError('required')
+        ) {
+          <small class="error-message">
+            Password is required.
+          </small>
+        }
+
+      </div>
+
+
+      <button
+        class="login-button"
+        type="submit"
+      >
+        Login
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
