@@ -1,12 +1,13 @@
+using System.Text.Json;
 using Enhanzer.Api.DTOs;
 using Enhanzer.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace Enhanzer.Api.Controllers;
 
 [ApiController]
-[Route("api/Auth")]
+[Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly AuthService _authService;
@@ -16,6 +17,7 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
+    // Simple test endpoint
     [HttpGet("test")]
     public IActionResult Test()
     {
@@ -25,9 +27,9 @@ public class AuthController : ControllerBase
         });
     }
 
+    // Login endpoint
     [HttpPost("login")]
-    public async Task<IActionResult> Login(
-        LoginRequest request)
+    public async Task<IActionResult> Login(LoginRequest request)
     {
         try
         {
@@ -63,5 +65,26 @@ public class AuthController : ControllerBase
                     "The authentication service returned an invalid response."
             });
         }
+    }
+
+    // Protected endpoint
+    [Authorize]
+    [HttpGet("profile")]
+    public IActionResult Profile()
+    {
+        return Ok(new
+        {
+            message = "You are authenticated.",
+
+            userCode = User.FindFirst(
+                System.Security.Claims.ClaimTypes.NameIdentifier
+            )?.Value,
+
+            email = User.FindFirst(
+                System.Security.Claims.ClaimTypes.Email
+            )?.Value,
+
+            displayName = User.Identity?.Name
+        });
     }
 }

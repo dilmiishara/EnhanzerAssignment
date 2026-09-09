@@ -11,4 +11,7 @@ public class LoginResponse
     public string Email { get; set; } = string.Empty;
 
     public int LocationsProcessed { get; set; }
+    
+    public string Token { get; set; } = string.Empty;
+
 }

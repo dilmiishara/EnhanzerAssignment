@@ -9,16 +9,19 @@ public class AuthService
 {
     private readonly HttpClient _httpClient;
     private readonly LocationService _locationService;
+    private readonly JwtService _jwtService;
 
     private const string LoginApiUrl =
         "https://ez-staging-api.azurewebsites.net/api/External_Api/POS_Api/Invoke";
 
     public AuthService(
         HttpClient httpClient,
-        LocationService locationService)
+        LocationService locationService,
+        JwtService jwtService)
     {
         _httpClient = httpClient;
         _locationService = locationService;
+        _jwtService = jwtService;
     }
 
     public async Task<LoginResponse> LoginAsync(
@@ -52,6 +55,9 @@ public class AuthService
         var responseContent =
             await response.Content.ReadAsStringAsync();
 
+        Console.WriteLine("========== EXTERNAL LOGIN RESPONSE ==========");
+        Console.WriteLine(responseContent);
+        Console.WriteLine("=============================================");
 
         var loginResponse =
             JsonSerializer.Deserialize<ExternalLoginResponse>(
@@ -82,13 +88,20 @@ public class AuthService
                     user.UserLocations
                 );
 
+        var token = _jwtService.GenerateToken(
+            user.UserCode,
+            user.Email,
+            user.UserDisplayName
+        );
+
         return new LoginResponse
         {
             Success = true,
             Message = "Login successful.",
             DisplayName = user.UserDisplayName,
             Email = user.Email,
-            LocationsProcessed = locationsProcessed
+            LocationsProcessed = locationsProcessed,
+            Token = token
         };
     }
 }
