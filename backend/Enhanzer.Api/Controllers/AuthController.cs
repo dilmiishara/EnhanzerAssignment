@@ -1,3 +1,4 @@
+using Enhanzer.Api.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Enhanzer.Api.Controllers;
@@ -12,6 +13,17 @@ public class AuthController : ControllerBase
         return Ok(new
         {
             message = "Auth API is working"
+        });
+    }
+
+    [HttpPost("login")]
+    public IActionResult Login(LoginRequest request)
+    {
+        return Ok(new
+        {
+            success = true,
+            message = "Login request received successfully",
+            email = request.Email
         });
     }
 }
