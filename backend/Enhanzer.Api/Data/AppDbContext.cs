@@ -11,4 +11,13 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<LocationDetail> LocationDetails { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<LocationDetail>()
+            .HasIndex(location => location.LocationCode)
+            .IsUnique();
+    }
 }

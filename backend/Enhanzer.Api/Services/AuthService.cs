@@ -8,46 +8,87 @@ namespace Enhanzer.Api.Services;
 public class AuthService
 {
     private readonly HttpClient _httpClient;
+    private readonly LocationService _locationService;
 
     private const string LoginApiUrl =
         "https://ez-staging-api.azurewebsites.net/api/External_Api/POS_Api/Invoke";
 
-    public AuthService(HttpClient httpClient)
+    public AuthService(
+        HttpClient httpClient,
+        LocationService locationService)
     {
         _httpClient = httpClient;
+        _locationService = locationService;
     }
 
-    public async Task<JsonElement> LoginAsync(LoginRequest request)
+    public async Task<LoginResponse> LoginAsync(
+        LoginRequest request)
     {
-        var externalRequest = new ExternalLoginRequest
-        {
-            CompanyCode = request.Email,
-
-            ApiBody = new ExternalLoginBody
+        var externalRequest =
+            new ExternalLoginRequest
             {
-                Username = request.Email,
-                Password = request.Password
-            }
-        };
+                CompanyCode = request.Email,
 
-        var response = await _httpClient.PostAsJsonAsync(
-            LoginApiUrl,
-            externalRequest
-        );
+                ApiBody = new ExternalLoginBody
+                {
+                    Username = request.Email,
+                    Password = request.Password
+                }
+            };
 
-        var responseContent =
-            await response.Content.ReadAsStringAsync();
+        var response =
+            await _httpClient.PostAsJsonAsync(
+                LoginApiUrl,
+                externalRequest
+            );
 
         if (!response.IsSuccessStatusCode)
         {
             throw new HttpRequestException(
-                $"External login API returned status code {(int)response.StatusCode}."
+                $"Authentication service returned HTTP status {(int)response.StatusCode}."
             );
         }
 
-        using var document =
-            JsonDocument.Parse(responseContent);
+        var responseContent =
+            await response.Content.ReadAsStringAsync();
 
-        return document.RootElement.Clone();
+
+        var loginResponse =
+            JsonSerializer.Deserialize<ExternalLoginResponse>(
+                responseContent
+            );
+
+        if (loginResponse is null)
+        {
+            throw new JsonException(
+                "Authentication service returned an empty response."
+            );
+        }
+
+        if (loginResponse.StatusCode != 200 ||
+            loginResponse.ResponseBody is null ||
+            loginResponse.ResponseBody.Count == 0)
+        {
+            throw new UnauthorizedAccessException(
+                "Invalid email or password."
+            );
+        }
+
+        var user = loginResponse.ResponseBody[0];
+
+        var locationsProcessed =
+            await _locationService
+                .SaveOrUpdateLocationsAsync(
+                    user.UserLocations
+                );
+
+        return new LoginResponse
+        {
+            Success = true,
+            Message = "Login successful.",
+            DisplayName = user.UserDisplayName,
+            Email = user.Email,
+            LocationsProcessed = locationsProcessed
+        };
     }
 }

@@ -12,6 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddHttpClient<AuthService>();
+builder.Services.AddScoped<LocationService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(

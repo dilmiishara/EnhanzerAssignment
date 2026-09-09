@@ -26,7 +26,8 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginRequest request)
+    public async Task<IActionResult> Login(
+        LoginRequest request)
     {
         try
         {
@@ -35,12 +36,21 @@ public class AuthController : ControllerBase
 
             return Ok(result);
         }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized(new
+            {
+                success = false,
+                message = "Invalid email or password."
+            });
+        }
         catch (HttpRequestException ex)
         {
             return StatusCode(502, new
             {
                 success = false,
-                message = "Unable to communicate with the authentication service.",
+                message =
+                    "Unable to communicate with the authentication service.",
                 error = ex.Message
             });
         }
@@ -49,7 +59,8 @@ public class AuthController : ControllerBase
             return StatusCode(502, new
             {
                 success = false,
-                message = "The authentication service returned an invalid response."
+                message =
+                    "The authentication service returned an invalid response."
             });
         }
     }
