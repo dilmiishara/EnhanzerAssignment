@@ -3,8 +3,23 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
-# dotenv files
+# Environment / secret files
 .env
+.env.*
+!.env.example
+
+# Angular / Node
+node_modules/
+dist/
+.angular/
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+
+# VS Code
+.vscode/
 
 # User-specific files
 *.rsuser
@@ -381,14 +396,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-
-# VS Code files for those working on multiple tools
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-*.code-workspace
 
 # Local History for Visual Studio Code
 .history/
